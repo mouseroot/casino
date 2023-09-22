@@ -38,13 +38,14 @@ def select_bet(bank):
                 if bet_select == 1:
                     if bank['bucks'] <= 0:
                         print(f"You dont got enough dosh.")
-                        continue
+                        break
                     else:
                         print(f"Alright, your using cold cash, the good stuff.")
                         bet_type = "bucks"
                 elif bet_select == 2:
                     if bank['coins'] <= 0:
                         print(f"Not enough coins...")
+                        break
                         
                     else:
                         print(f"Using coins, good at any casino")
@@ -52,6 +53,7 @@ def select_bet(bank):
                 elif bet_select == 3:
                     if bank['limecoins'] <= 0:
                         print(f"Get more limecoin, and come back")
+                        break
                         
                     else:
                         print("Limecoins, only good here.")
