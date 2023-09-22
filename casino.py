@@ -10,8 +10,10 @@ bank_account = {
 
 def save_game(sv_fname):
     json.dump(bank_account, open(sv_fname,"w"))
+    print(f"💾 Game was saved")
 
 def load_game(ld_fname):
+    print(f"💿 Game Loaded")
     return json.load(open(ld_fname,"r"))
 
 def clearscr():
@@ -24,18 +26,21 @@ def header(bank):
 
 def select_bet(bank):
     bet_type = False
-    print(f"1. Use Bucks (${bank['bucks']})")
-    print(f"2. Use Coins ({bank['coins']} Coins)")
-    print(f"3. Use Limecoins ({bank['limecoins']})")
-    print("4. Cancel Bet")
+    print(f"1. 💵 Use Bucks (${bank['bucks']})")
+    print(f"2. 🔘 Use Coins ({bank['coins']} Coins)")
+    print(f"3. 🟡 Use Limecoins ({bank['limecoins']})")
+    print("4. ❌ Cancel Bet")
     try:
-        bet_select = int(input("Bet with?"))
+        bet_select = int(input("Bet with? "))
         if bet_select in range(1,5):
             if bet_select == 1:
+                print(f"Alright, your using your Bucks")
                 bet_type = "bucks"
             elif bet_select == 2:
+                print(f"Using coins, good at any casino")
                 bet_type = "coins"
             elif bet_select == 3:
+                print("Limecoins, only good here.")
                 bet_type = "limecoins"
             elif bet_select == 4:
                 return False
@@ -43,8 +48,9 @@ def select_bet(bank):
         return False
     try:
         while 1:
-            amt = int(input(f"How much?"))
+            amt = int(input(f"How much {bet_type} you wanna wager? "))
             if int(bank[bet_type]) >= amt:
+                print(f"Alright thats {amt} {bet_type}")
                 return (bet_type, amt)
             else:
                 continue
@@ -116,21 +122,21 @@ def slots(bank):
                 random.seed(None)
                 roll_i = random.choice(roll)
                 rolls.append(roll_i)
-            print(f"SPIN {i}\t{rolls[0]}|{rolls[1]}|{rolls[2]}")
+            print(f"SPIN {i}/5\t{rolls[0]}|{rolls[1]}|{rolls[2]}")
             
             
             if rolls[0] == rolls[1] == rolls[2]:
                 did_win = True
                 winning += (my_bet[1]) + (get_value(rolls[0]) * 3)
-                print(f"TRIPPLE WIN! {rolls[0]}x3 -> {get_value(rolls[0])}")
+                print(f"WIN! WIN! WIN! {rolls[0]}x3 -> {get_value(rolls[0]) * 3}")
             elif rolls[0] == rolls[1]:
                 did_win = True
                 winning += (my_bet[1]) + (get_value(rolls[0]) * 2)
-                print(f"WIN! {rolls[0]}x2 -> {get_value(rolls[0])}")
+                print(f"WIN! {rolls[0]}x2 -> {get_value(rolls[0]) * 2}")
             elif rolls[1] == rolls[2]:
                 did_win = True
                 winning += (my_bet[1]) + (get_value(rolls[1]) * 2)
-                print(f"WIN! {rolls[1]}x2 -> {get_value(rolls[1])}")
+                print(f"WIN! {rolls[1]}x2 -> {get_value(rolls[1]) * 2}")
             time.sleep(4)
         if did_win:
             print(f"You Won { winning } {my_bet[0]}")
@@ -169,35 +175,36 @@ def casino(bank):
             elif sel == 3:
                 break
 
+import os.path
 
-
-#random.seed(None)
-while 1:
-    clearscr()
-    header(bank_account)
-    print("1. Visit Casino")
-    print("2. Explore")
-    print("3. Save")
-    print("4. Resume (Load File)")
-    print("5. Quit")
-    try:
-        sel = int(input("?"))
-    except KeyboardInterrupt:
-        break
-    if sel in range(1,6):
-        if sel == 1:
-            casino(bank_account)
-        elif sel == 2:
-            explore(bank_account)
-        elif sel == 3:
-            if bank_account['bucks'] == 0 and bank_account['coins'] == 0 and bank_account['limecoins'] == 0:
-                print("Zero Balance, cant save (did you mean to load a save?)")
-            else:
-                save_game("save.json")
-        elif sel == 4:
-            bank_account = load_game("save.json")
-            print("Loaded")
-        elif sel == 5:
+def main(bank):
+    while 1:
+        clearscr()
+        header(bank)
+        print("1.💰 Visit Casino")
+        print("2.🌐 Explore")
+        print("3.💾 Save")
+        print(f"4.🥈 Resume ({'File Found' if os.path.exists('save.json') else 'No Save'})")
+        print("5.❌ Quit")
+        try:
+            sel = int(input("?"))
+        except KeyboardInterrupt:
             break
+        if sel in range(1,6):
+            if sel == 1:
+                casino(bank)
+            elif sel == 2:
+                explore(bank)
+            elif sel == 3:
+                if bank['bucks'] == 0 and bank['coins'] == 0 and bank['limecoins'] == 0:
+                    print("💲 Zero Balance, cant save (did you mean to load a save?)")
+                else:
+                    save_game("save.json")
+            elif sel == 4:
+                bank = load_game("save.json")
+                print("Loaded")
+            elif sel == 5:
+                break
 
 
+main(bank_account)
