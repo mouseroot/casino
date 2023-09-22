@@ -1,6 +1,7 @@
 import random
 import json
 import time
+import os.path
 
 bank_account = {
     "bucks": 0,
@@ -24,6 +25,10 @@ def clearscr():
 def header(bank):
     print(f"Bank: ${bank['bucks']} / {bank['coins']} Coins / {bank['limecoins']} Limecoins")
 
+def is_broke(bank):
+    return bank['bucks'] > 0 and bank['coins'] > 0 and bank['limecoins']
+
+# select_bet - Show the select bet menu, returns (bet_type, ammount)
 def select_bet(bank):
     while 1:
         print(random.choice(["Cmon, place ya bets","Care to make a wager?"]))
@@ -73,7 +78,18 @@ def select_bet(bank):
         except KeyboardInterrupt:
             return False
 
+#beg - random chance to get some coins.
+def beg(bank):
+    print("You beg")
+    beg_chance = random.randint(1,6)
+    if beg_chance >= 4:
+        r_ammount = random.randint(1,10)
+        print(f"A kind stranger hands you {r_ammount} coins")
+        bank['coins'] += r_ammount
+    else:
+        print(f"Many pass by, but nobody gives you anything")
 
+#explore - explore around the casino
 def explore(bank):
     while 1:
         print("You explore around")
@@ -83,19 +99,13 @@ def explore(bank):
         sel = int(input("?"))
         if sel in range(1,4):
             if sel == 1:
-                print("You beg")
-                beg_chance = random.randint(1,6)
-                if beg_chance >= 4:
-                    r_ammount = random.randint(1,10)
-                    print(f"A kind stranger hands you {r_ammount} coins")
-                    bank['coins'] += r_ammount
-                else:
-                    print(f"Many pass by, but nobody gives you anything")
+                beg(bank)
             elif sel == 2:
                 print("You wander around...")
             elif sel == 3:
                 break
 
+#get_value(char) - returns the number value of special chars like K,Q,J,A and wild chars
 def get_value(item):
         if item == 'A':
             return 20
@@ -115,10 +125,10 @@ def get_value(item):
             return int(item)
 
 
-
+#slots game - place bets, spin 5 slots, each match is a win
 def slots(bank):
     while 1:
-        if bank['bucks'] > 0 or bank['coins'] > 0 or bank['limecoins'] > 0:
+        if not is_broke(bank):
             my_bet = select_bet(bank)
             if my_bet:
                 if my_bet[0] == "bucks":
@@ -129,6 +139,7 @@ def slots(bank):
                     print(f"You wagered {my_bet[1]} Limecoins")
             else:
                 break
+            #remove money from account.
             bank[my_bet[0]] -= my_bet[1]
             roll = "1,2,3,4,5,6,7,8,9,A,J,K,Q,#,%,&".split(",")
             rolls = []
@@ -167,10 +178,11 @@ def slots(bank):
     
 
 
-
+#roullete - gonna use cos to generate an angle, and dot product to gestimate its closeness
 def roullete(bank):
     pass
 
+#casino menu
 def casino(bank):
     while 1:
         clearscr()
@@ -193,35 +205,62 @@ def casino(bank):
             elif sel == 3:
                 break
 
-import os.path
 
-def main(bank):
+#sanitized input
+def get_input(prompt):
     while 1:
-        clearscr()
-        header(bank)
-        print("1.💰 Visit Casino")
-        print("2.🌐 Explore")
-        print("3.💾 Save")
-        print(f"4.💸 Resume ({'File Found' if os.path.exists('save.json') else 'No Save'})")
-        print("5.❌ Quit")
         try:
-            sel = int(input("?"))
+            return int(input(prompt))
         except KeyboardInterrupt:
-            break
-        if sel in range(1,6):
+            return False
+        except ValueError:
+            continue
+
+#game start menu (1st menu)
+def bootup(bank):
+    while 1:
+        print("Welcome to Casino")
+        print("1. 💲 Start new game")
+        print("2. ⏩ Continue")
+        print("3. ❌ Quit")
+        sel = get_input("?")
+        if sel in range(1,4):
             if sel == 1:
-                casino(bank)
+                main(bank)
+                break
             elif sel == 2:
-                explore(bank)
-            elif sel == 3:
-                if bank['bucks'] == 0 and bank['coins'] == 0 and bank['limecoins'] == 0:
-                    print("💲 Zero Balance, cant save (did you mean to load a save?)")
-                else:
-                    save_game("save.json")
-            elif sel == 4:
                 bank = load_game("save.json")
-            elif sel == 5:
+                main(bank)
+                break
+            elif sel == 3:
                 break
 
+#main game loop
+def main(bank):
+    clearscr()
+    header(bank)
+    print("1.💰 Visit Casino")
+    print("2.🌐 Travel")
+    print("3.💾 Save")
+    #print(f"4.💸 Resume ({'File Found' if os.path.exists('save.json') else 'No Save'})")
+    print("4.❌ Quit")
+    try:
+        sel = int(input("?"))
+    except KeyboardInterrupt:
+        return
+    if sel in range(1,5):
+        if sel == 1:
+            casino(bank)
+        elif sel == 2:
+            explore(bank)
+        elif sel == 3:
+            if bank['bucks'] == 0 and bank['coins'] == 0 and bank['limecoins'] == 0:
+                print("💲 Zero Balance, cant save (did you mean to load a save?)")
+            else:
+                save_game("save.json")
+        elif sel == 4:
+            return
 
-main(bank_account)
+
+# Main
+bootup(bank_account)
