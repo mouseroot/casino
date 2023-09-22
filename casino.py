@@ -232,11 +232,33 @@ def slots(data):
             print("❌ Your broke chum!")
         save_data = data
 
+def computer():
+    global save_data
+    print("1. ✉ Check Email")
+    print("2. 🌐 Browse Web")
+    print("3. 💾 Hack Servers")
 
 
-def home(bank):
+
+def home(data):
     increase_time()
     print("Welcome home")
+    print("1. 🪑 Relax")
+    print("2. 🛏 Sleep")
+    print("3. 📺 Watch TV")
+    print("4. 🖱 Use Computer")
+    print("5. ❌ Leave")
+    sel = get_input("? ")
+    if sel in range(1,6):
+        if sel == 1:
+            print("You sit down and relax")
+        elif sel == 2:
+            print("You sleep in your own bed")
+        elif sel == 3:
+            print("You watch some t.v")
+        elif sel == 4:
+            print("You turn on your PC")
+            computer()
 
 def go_bank(bank):
     increase_time()
