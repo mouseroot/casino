@@ -260,9 +260,40 @@ def home(data):
             print("You turn on your PC")
             computer()
 
-def go_bank(bank):
+def go_bank(data):
+    balance = data['balance']
+    bank = data['bank']
     increase_time()
-    print("Save your assets")
+    print("Welcome to the Swiss Bank 🧀")
+    print("Teller: We only take bucks here.")
+    print("1. Make a Deposit 💵")
+    print("2. Make a Widthdrawl 🏧")
+    print("3. ❌ Leave")
+    sel = get_input("? ")
+    if sel in range(1,4):
+        if sel == 1:
+            if balance['bucks'] > 0:
+                print("💵 How much you depositting in?")
+                amt = get_input("💵 Bucks ?")
+                if amt >= balance['bucks']:
+                    bank['bucks'] += amt
+                    balance['bucks'] -= amt
+                    print(f"🏧 You depositted {amt} into your account")
+                    print(f"🏧 Your new balance is {balance['bucks']}")
+                else:
+                    print("❌ Aint got enough!")
+        elif sel == 2:
+            if bank['bucks'] > 0:
+                print(f"Alright, how much you taking out? (Balance: {bank['bucks']})")
+                amt = get_input("💵 Bucks ?")
+                if amt >= bank['bucks']:
+                    bank['bucks'] -= amt
+                    balance['bucks'] += amt
+                    print(f"🏧 You Widthdrew {amt} from your account")
+                    print(f"🏧 Your new balance is {balance['bucks']}")
+                    
+                else:
+                    print("❌ You dont have that much in your account...")
 
 def xchange(bank):
     increase_time()
@@ -280,7 +311,7 @@ def docks(bank):
     print("Float to different places")
 
 #travel to different areas
-def travel(bank):
+def travel(data):
     increase_time()
     print("Travel To Where")
     print("1. 🏠 Home")
@@ -291,21 +322,21 @@ def travel(bank):
     sel = get_input("? ")
     if sel in range(1,6):
         if sel == 1:
-            home(bank)
+            home(data)
         elif sel == 2:
-            go_bank(bank)
+            go_bank(data)
         elif sel == 3:
-            xchange(bank)
+            xchange(data)
         elif sel == 4:
-            airport(bank)
+            airport(data)
         elif sel == 5:
-            docks(bank)
+            docks(data)
 
 
 
 
 #roullete - gonna use cos to generate an angle, and dot product to gestimate its closeness
-def roullete(bank):
+def roullete(data):
     pass
 
 #casino menu
