@@ -9,6 +9,7 @@ bank_account = {
     "limecoins": 0
 }
 
+
 def save_game(sv_fname):
     json.dump(bank_account, open(sv_fname,"w"))
     print(f"💾 Game was saved")
@@ -166,6 +167,10 @@ def slots(bank):
                     did_win = True
                     winning += (my_bet[1]) + (get_value(rolls[1]) * 2)
                     print(f"WIN! {rolls[1]}x2 -> {get_value(rolls[1]) * 2}")
+                elif rolls[0] == rolls[2]:
+                    did_win = True
+                    winning += (my_bet[1]) + (get_value(rolls[1]) * 2)
+                    print(f"WIN! {rolls[1]}x2 -> {get_value(rolls[1]) * 2}")
                 time.sleep(4)
             if did_win:
                 print(f"You Won { winning } {my_bet[0]}")
@@ -174,8 +179,49 @@ def slots(bank):
                 print(f"You lost {my_bet[1]} {my_bet[0]}")
         else:
             print("Your broke chum!")
-    
-    
+
+
+
+
+
+
+def home(bank):
+    print("Welcome home")
+
+def go_bank(bank):
+    print("Save your assets")
+
+def xchange(bank):
+    print("Convert your coins into bucks")
+
+def airport(bank):
+    print("Fly to different places")
+
+def docks(bank):
+    print("Float to different places")
+
+#travel to different areas
+def travel(bank):
+    print("Travel To Where")
+    print("1. 🏠 Home")
+    print("2. 🏦 Bank")
+    print("3. 🏛  Currency Exchange")
+    print("4. ✈  Airport")
+    print("5. 🚢 Docks")
+    sel = get_input("? ")
+    if sel in range(1,6):
+        if sel == 1:
+            home(bank)
+        elif sel == 2:
+            go_bank(bank)
+        elif sel == 3:
+            xchange(bank)
+        elif sel == 4:
+            airport(bank)
+        elif sel == 5:
+            docks(bank)
+
+
 
 
 #roullete - gonna use cos to generate an angle, and dot product to gestimate its closeness
@@ -237,29 +283,30 @@ def bootup(bank):
 
 #main game loop
 def main(bank):
-    clearscr()
-    header(bank)
-    print("1.💰 Visit Casino")
-    print("2.🌐 Travel")
-    print("3.💾 Save")
-    #print(f"4.💸 Resume ({'File Found' if os.path.exists('save.json') else 'No Save'})")
-    print("4.❌ Quit")
-    try:
-        sel = int(input("?"))
-    except KeyboardInterrupt:
-        return
-    if sel in range(1,5):
-        if sel == 1:
-            casino(bank)
-        elif sel == 2:
-            explore(bank)
-        elif sel == 3:
-            if bank['bucks'] == 0 and bank['coins'] == 0 and bank['limecoins'] == 0:
-                print("💲 Zero Balance, cant save (did you mean to load a save?)")
-            else:
-                save_game("save.json")
-        elif sel == 4:
+    while 1:
+        clearscr()
+        header(bank)
+        print("1.💰 Visit Casino")
+        print("2.🌐 Travel")
+        print("3.💾 Save")
+        #print(f"4.💸 Resume ({'File Found' if os.path.exists('save.json') else 'No Save'})")
+        print("4.❌ Quit")
+        try:
+            sel = int(input("?"))
+        except KeyboardInterrupt:
             return
+        if sel in range(1,5):
+            if sel == 1:
+                casino(bank)
+            elif sel == 2:
+                travel(bank)
+            elif sel == 3:
+                if bank['bucks'] == 0 and bank['coins'] == 0 and bank['limecoins'] == 0:
+                    print("💲 Zero Balance, cant save (did you mean to load a save?)")
+                else:
+                    save_game("save.json")
+            elif sel == 4:
+                return
 
 
 # Main
