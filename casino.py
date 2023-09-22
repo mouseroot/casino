@@ -1,6 +1,8 @@
 import random
 import json
 import time
+import math
+import sys
 import os.path
 
 bank_account = {
@@ -15,6 +17,7 @@ save_data = {
     "losses": 0,
     "win_sum": 0,
     "loss_sum": 0,
+    "energy": 100,
     "days": 0,
     "hours": 0,
     "bank": bank_account,
@@ -31,16 +34,20 @@ def load_game(ld_fname):
     return json.load(open(ld_fname,"r"))
 
 def clearscr():
-    #print(chr(27) + "[2J")
-    print()
-    print()
+    print(chr(27) + "[2J")
+    #print()
+    #print()
 
-def increase_time():
+def increase_time(val=1):
     global save_data
-    save_data['hours'] += 1
+    save_data['hours'] += val
     if save_data['hours'] >= 24:
         save_data['days'] += 1
         save_data['hours'] = 0
+
+def use_energy(amt):
+    global save_data
+    save_data['energy'] -= amt
 
 def stats(data):
     print(f"Name: 🧑 {data['name']}")
@@ -57,12 +64,24 @@ def header(data):
     print("-"*50)
     print(f"Name: {data['name']} ✔ {data['wins']} / ❌ {data['losses']}")
     print(f"Time: ⌚ {data['hours']} Hours / 📅 {data['days']} Days")
-    print(f"Balance: 💵 ${balance['bucks']} / 🔘 {balance['coins']} Coins / 🟡 {balance['limecoins']} Limecoins")
+    print(f"Balance: 💵 ${balance['bucks']:.2f} / 🔘 {math.ceil(balance['coins'])} Coins / 🟡 {math.ceil(balance['limecoins'])} Limecoins")
+    print(f"Energy: ⚡ {data['energy']}")
     print(f"-"*50)
 
 def is_broke(data):
     balance = data['balance']
-    return balance['bucks'] > 0 and balance['coins'] > 0 and balance['limecoins']
+    return balance['bucks'] == 0 and balance['coins'] == 0 and balance['limecoins'] == 0
+
+def sleep(time):
+    global save_data
+    for i in range(time):
+        print('💤',end='')
+        time.sleep(3)
+    print('',end='\n')
+    r_energy = random.randint(50,100)
+    save_data['energy'] += r_energy
+    print(f"⚡ Gained {r_energy}")
+
 
 # select_bet - Show the select bet menu, returns (bet_type, ammount)
 def select_bet(data):
@@ -70,9 +89,9 @@ def select_bet(data):
         balance = data['balance']
         print(random.choice(["Cmon, place ya bets","Care to make a wager?"]))
         bet_type = False
-        print(f"1. 💵 Use Bucks (${balance['bucks']})")
-        print(f"2. 🔘 Use Coins ({balance['coins']} Coins)")
-        print(f"3. 🟡 Use Limecoins ({balance['limecoins']})")
+        print(f"1. 💵 Use Bucks (${balance['bucks']:.2f})")
+        print(f"2. 🔘 Use Coins ({math.ceil(balance['coins'])} Coins)")
+        print(f"3. 🟡 Use Limecoins ({math.ceil(balance['limecoins'])})")
         print("4. ❌ Cancel Bet")
         try:
             bet_select = int(input("Bet with? "))
@@ -117,32 +136,46 @@ def select_bet(data):
 
 #beg - random chance to get some coins.
 def beg(data):
-    increase_time()
+    
+    #clearscr()
+    header(data)
     balance = data['balance']
-    print("You beg")
-    beg_chance = random.randint(1,6)
-    if beg_chance >= 4:
-        r_ammount = random.randint(1,10)
-        print(f"👍 A kind stranger hands you {r_ammount} coins")
-        balance['coins'] += r_ammount
+    if data['energy'] > 2:
+        increase_time()
+        use_energy(2)
+        print("You beg")
+        r_currencies_str = ['🔘 coins','🟡 limecoins','💵 bucks']
+        r_currency = random.choice(r_currencies_str)
+
+        beg_chance = random.randint(1,6)
+        if beg_chance >= 4:
+            r_ammount = random.randint(1,10)
+            print(f"👍 A kind stranger hands you {r_ammount} {r_currency}")
+            balance[r_currency[2:].strip()] += r_ammount
+        else:
+            print(f"👎 Many pass by, but nobody gives you anything")
     else:
-        print(f"👎 Many pass by, but nobody gives you anything")
+        print("❌ Your out of energy 🏠 Go Home and Rest/Sleep")
 
 #explore - explore around the casino
 def explore(data):
     while 1:
+        #clearscr()
+        header(data)
         increase_time()
         balance = data['balance']
         print("You explore around")
         print("1. 🙌 Beg on the streets")
         print("2. 👞 Walk around")
         print("3. ❌ Go Back")
-        sel = int(input("?"))
+        sel = get_input("? ")
         if sel in range(1,4):
             if sel == 1:
                 beg(data)
             elif sel == 2:
                 print("You wander around...")
+                use_energy(5)
+                increase_time(2)
             elif sel == 3:
                 break
 
@@ -187,8 +220,10 @@ def slots(data):
             #remove money from account.
             balance[my_bet[0]] -= my_bet[1]
             increase_time()
+            use_energy(3)
             roll = "1,2,3,4,5,6,7,8,9,A,J,K,Q,♥,♦,♠,♣".split(",")
             rolls = []
+            multi = 0
             did_win = False
             winning = 0
             for i in range(5):
@@ -205,32 +240,44 @@ def slots(data):
                     winning += (my_bet[1]) + (get_value(rolls[0]) * 3)
                     print(f"💲💲💲 WIN! WIN! WIN! {rolls[0]}x3 -> {get_value(rolls[0]) * 3}")
                     data['wins'] += 1
+                    multi += 1
                 elif rolls[0] == rolls[1]:
                     did_win = True
                     winning += (my_bet[1]) + (get_value(rolls[0]) * 2)
-                    print(f"💲 WIN! {rolls[0]}x2 -> {get_value(rolls[0]) * 2}")
+                    print(f"💲 WIN! {rolls[0]} x2 -> {get_value(rolls[0]) * 2}")
                     data['wins'] += 1
+                    multi += 1
                 elif rolls[1] == rolls[2]:
                     did_win = True
                     winning += (my_bet[1]) + (get_value(rolls[1]) * 2)
-                    print(f"💲 WIN! {rolls[1]}x2 -> {get_value(rolls[1]) * 2}")
+                    print(f"💲 WIN! {rolls[1]} x2 -> {get_value(rolls[1]) * 2}")
                     data['wins'] += 1
+                    multi += 1
                 elif rolls[0] == rolls[2]:
                     did_win = True
-                    winning += (my_bet[1]) + (get_value(rolls[1]) * 2)
-                    print(f"💲 WIN! {rolls[1]}x2 -> {get_value(rolls[1]) * 2}")
+                    winning += (my_bet[1]) + (get_value(rolls[0]) * 2)
+                    print(f"💲 WIN! {rolls[0]} x2 -> {get_value(rolls[0]) * 2}")
                     data['wins'] += 1
+                    multi += 1
                 time.sleep(4)
             if did_win:
-                print(f"💲💲💲 You Won { winning } {my_bet[0]}")
+                
+                if multi > 1:
+                    print(f"Win Multiplier x{multi}")
+                    if multi > 3:
+                        print(f"+4x Bonus +500")
+                        winning += 500
+                    winning *= multi
                 balance[my_bet[0]] += int(winning)
                 data['win_sum'] += int(winning)
+                print(f"💲💲💲 You Won { winning } {my_bet[0]}")
             else:
                 print(f"👎 You lost {my_bet[1]} {my_bet[0]}")
                 data['losses'] += 1
         else:
             print("❌ Your broke chum!")
         save_data = data
+        return
 
 def computer():
     global save_data
@@ -242,6 +289,9 @@ def computer():
 
 def home(data):
     increase_time()
+    use_energy(1)
+    clearscr()
+    header(data)
     print("Welcome home")
     print("1. 🪑 Relax")
     print("2. 🛏 Sleep")
@@ -252,8 +302,12 @@ def home(data):
     if sel in range(1,6):
         if sel == 1:
             print("You sit down and relax")
+            r_energy = random.randint(5,25)
+            data['energy'] += r_energy
+            print(f"⚡ Gained {r_energy}")
         elif sel == 2:
             print("You sleep in your own bed")
+            sleep(5)
         elif sel == 3:
             print("You watch some t.v")
         elif sel == 4:
@@ -264,10 +318,16 @@ def go_bank(data):
     balance = data['balance']
     bank = data['bank']
     increase_time()
+    use_energy(5)
+    clearscr()
+    header(data)
     print("Welcome to the Swiss Bank 🧀")
-    print("Teller: We only take bucks here.")
-    print("1. Make a Deposit 💵")
-    print("2. Make a Widthdrawl 🏧")
+    print("Teller: We only take bucks here. 💵")
+    if balance['bucks'] == 0 and bank['bucks'] == 0:
+        print(f"You dont seem to have any bucks at all, hit the casino chum.")
+        return
+    print("1. 💵 Make a Deposit")
+    print("2. 🏧 Make a Widthdrawl")
     print("3. ❌ Leave")
     sel = get_input("? ")
     if sel in range(1,4):
@@ -284,35 +344,81 @@ def go_bank(data):
                     print("❌ Aint got enough!")
         elif sel == 2:
             if bank['bucks'] > 0:
-                print(f"Alright, how much you taking out? (Balance: {bank['bucks']})")
+                print(f"Alright, how much you taking out? (1alance: {bank['bucks']})")
                 amt = get_input("💵 Bucks ?")
                 if amt >= bank['bucks']:
                     bank['bucks'] -= amt
                     balance['bucks'] += amt
                     print(f"🏧 You Widthdrew {amt} from your account")
                     print(f"🏧 Your new balance is {balance['bucks']}")
-                    
+
                 else:
                     print("❌ You dont have that much in your account...")
 
-def xchange(bank):
+def xchange(data):
+    global save_data
+    balance = data['balance']
     increase_time()
-    print("Convert your coins into bucks")
-    print("1. 🔘 -> 💵 (Coins to Bucks)")
+    use_energy(5)
+    clearscr()
+    header(data)
+    print("Convert your coins into bucks, and back again")
+    print(f"1. 🔘 200 -> 💵 $2.25")
+    print(f"2. 🔘 500 -> 💵 $5.50")
+    print(f"3. 💵 $2 -> 🔘 350")
+    print(f"4. 💵 $5 -> 🔘 570")
+    print("5. ❌ Leave")
+    sel = get_input("? ")
+    if sel in range(1,6):
+        if sel == 1:
+            if balance['coins'] >= 200:
+                balance['coins'] -= 200
+                balance['bucks'] += 1
+                print(f"Trading 🔘 for 💵")
+            else:
+                print(f"❌ Not Enough")
+        elif sel == 2:
+            if balance['coins'] >= 500:
+                balance['coins'] -= 500
+                balance['bucks'] += 5.50
+            else:
+                print(f"❌ Not Enough")
+        elif sel == 3:
+            if balance['bucks'] >= 2:
+                print(f"Trading 💵 for 🔘")
+                balance['bucks'] -= 2
+                balance['coins'] += 350
+            else:
+                print(f"❌ Not Enough")
+
+        elif sel == 4:
+            if balance['bucks'] >= 5:
+                print(f"Trading 💵 for 🔘")
+                balance['bucks'] -= 5
+                balance['coins'] += 570
+            else:
+                print(f"❌ Not Enough")
+        else:
+            pass
+    save_data = data
+    
 
 def airport(bank):
-    increase_time()
-    increase_time()
+    use_energy(10)
+    increase_time(2)
     print("Fly to different places")
 
 def docks(bank):
-    increase_time()
-    increase_time()
+    use_energy(10)
+    increase_time(2)
     print("Float to different places")
 
 #travel to different areas
 def travel(data):
+    use_energy(5)
     increase_time()
+    clearscr()
+    header(data)
     print("Travel To Where")
     print("1. 🏠 Home")
     print("2. 🏦 Bank")
@@ -342,20 +448,17 @@ def roullete(data):
 #casino menu
 def casino(data):
     while 1:
-        clearscr()
         header(data)
         print("💰💰 Casino 💰💰")
         print("1.🎰 Play Slots")
         print("2.🎡 Play Roullette")
         print("3.🌐 Explore around")
-        print("4.❌ Exit")
+        print("4.❌ Leave")
         try:
-            sel = int(input("?"))
+            sel = get_input("? ")
         except KeyboardInterrupt:
-            break
-        except ValueError:
-            continue
-        if sel in range(1,4):
+            return
+        if sel in range(1,5):
             if sel == 1:
                 slots(data)
             elif sel == 2:
@@ -363,7 +466,7 @@ def casino(data):
             elif sel == 3:
                 explore(data)
             elif sel == 4:
-                main(data)
+                return
 
 
 #sanitized input
@@ -403,22 +506,22 @@ def bootup(data):
                 main(save_data)
                 break
             elif sel == 3:
-                break
+                sys.exit(0)
 
 #main game loop
 def main(data):
-    
     while 1:
         balance = data['balance']
-        clearscr()
+        #clearscr()
         header(data)
+        print("🗺   Map Screen")
         print("1.💰 Visit Casino")
         print("2.🌐 Travel")
         print("3.💾 Save")
         #print(f"4.💸 Resume ({'File Found' if os.path.exists('save.json') else 'No Save'})")
         print("4.❌ Quit")
         try:
-            sel = int(input("?"))
+            sel = get_input("? ")
         except KeyboardInterrupt:
             return
         if sel in range(1,5):
@@ -432,7 +535,7 @@ def main(data):
                 else:
                     save_game("save.json", data)
             elif sel == 4:
-                return
+                break
 
 
 # Main
