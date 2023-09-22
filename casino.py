@@ -72,10 +72,11 @@ def is_broke(data):
     balance = data['balance']
     return balance['bucks'] == 0 and balance['coins'] == 0 and balance['limecoins'] == 0
 
-def sleep(time):
+def do_sleep(t):
     global save_data
-    for i in range(time):
+    for i in range(t):
         print('💤',end='')
+        sys.stdout.flush()
         time.sleep(3)
     print('',end='\n')
     r_energy = random.randint(50,100)
@@ -307,7 +308,7 @@ def home(data):
             print(f"⚡ Gained {r_energy}")
         elif sel == 2:
             print("You sleep in your own bed")
-            sleep(5)
+            do_sleep(5)
         elif sel == 3:
             print("You watch some t.v")
         elif sel == 4:
