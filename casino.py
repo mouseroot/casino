@@ -17,6 +17,7 @@ save_data = {
     "losses": 0,
     "win_sum": 0,
     "loss_sum": 0,
+    "tickets": 0,
     "energy": 100,
     "days": 0,
     "hours": 0,
@@ -65,7 +66,7 @@ def header(data):
     print(f"Name: {data['name']} ✔ {data['wins']} / ❌ {data['losses']}")
     print(f"Time: ⌚ {data['hours']} Hours / 📅 {data['days']} Days")
     print(f"Balance: 💵 ${balance['bucks']:.2f} / 🔘 {math.ceil(balance['coins'])} Coins / 🟡 {math.ceil(balance['limecoins'])} Limecoins")
-    print(f"Energy: ⚡ {data['energy']}")
+    print(f"Energy: ⚡ {data['energy']}\tTickets: 🎫 {data['tickets']}")
     print(f"-"*50)
 
 def is_broke(data):
@@ -158,48 +159,26 @@ def beg(data):
     else:
         print("❌ Your out of energy 🏠 Go Home and Rest/Sleep")
 
-#explore - explore around the casino
-def explore(data):
-    while 1:
-        #clearscr()
-        header(data)
-        increase_time()
-        balance = data['balance']
-        print("You explore around")
-        print("1. 🙌 Beg on the streets")
-        print("2. 👞 Walk around")
-        print("3. ❌ Go Back")
-        sel = get_input("? ")
-        if sel in range(1,4):
-            if sel == 1:
-                beg(data)
-            elif sel == 2:
-                print("You wander around...")
-                use_energy(5)
-                increase_time(2)
-            elif sel == 3:
-                break
-
 #get_value(char) - returns the number value of special chars like K,Q,J,A and wild chars
 def get_value(item):
         if item == 'A':
-            return 10
+            return 100
         elif item == 'J':
-            return 7
+            return 70
         elif item == 'K':
-            return 9
+            return 90
         elif item == 'Q':
-            return 9
+            return 90
         elif item == '♥':
-            return 5
+            return 50
         elif item == '♦':
-            return 5
+            return 50
         elif item == '♠':
-            return 5
+            return 50
         elif item == '♣':
-            return 5
+            return 50
         else:
-            return int(item)
+            return int(item)*2
 
 
 #slots game - place bets, spin 5 slots, each match is a win
@@ -266,7 +245,7 @@ def slots(data):
                 if multi > 1:
                     print(f"Win Multiplier x{multi}")
                     if multi > 3:
-                        print(f"+4x Bonus +500")
+                        print(f"+ 4x Bonus +500")
                         winning += 500
                     winning *= multi
                 balance[my_bet[0]] += int(winning)
@@ -320,10 +299,9 @@ def go_bank(data):
     bank = data['bank']
     increase_time()
     use_energy(5)
-    clearscr()
     header(data)
     print("Welcome to the Swiss Bank 🧀")
-    print("Teller: We only take bucks here. 💵")
+    print(f"Teller: You balance is 💵 {bank['bucks']}")
     if balance['bucks'] == 0 and bank['bucks'] == 0:
         print(f"You dont seem to have any bucks at all, hit the casino chum.")
         return
@@ -335,12 +313,12 @@ def go_bank(data):
         if sel == 1:
             if balance['bucks'] > 0:
                 print("💵 How much you depositting in?")
-                amt = get_input("💵 Bucks ?")
-                if amt >= balance['bucks']:
+                amt = float(input("💵 Bucks ?"))
+                if amt <= balance['bucks']:
                     bank['bucks'] += amt
                     balance['bucks'] -= amt
                     print(f"🏧 You depositted {amt} into your account")
-                    print(f"🏧 Your new balance is {balance['bucks']}")
+                    print(f"🏧 Your new balance is {bank['bucks']}")
                 else:
                     print("❌ Aint got enough!")
         elif sel == 2:
@@ -404,15 +382,43 @@ def xchange(data):
     save_data = data
     
 
-def airport(bank):
+def airport(data):
     use_energy(10)
     increase_time(2)
-    print("Fly to different places")
+    print("✈ Fly to different places")
+    if data['tickets'] >= 2:
+        pass
+    else:
+        print("❌ Not enough tickets")
 
-def docks(bank):
+def docks(data):
+    balance = data['balance']
     use_energy(10)
     increase_time(2)
-    print("Float to different places")
+    print("U.S.S 🚢 Sentinal")
+    print("Capt. Waters: Ya, need tickets a plenty to afford this cruize")
+    if data['tickets'] >= 10:
+        pass
+    else:
+        print("❌ Dont have enough tickets")
+
+def store(data):
+    use_energy(5)
+    increase_time(2)
+    header(data)
+    print(f"Welcome to the Store")
+    print("1.🍬 Buy Energy Candy x2 (💵 $20)")
+    print("2.🍫 Buy Bonus Chocolate x2 (💵 $70)")
+    print("3.🎫 Buy Tickets x1 (💵 $1000)")
+    print("3.❌ Leave")
+    sel = get_input("? ")
+    if sel in range(1,4):
+        if sel == 1:
+            pass
+        elif sel == 2:
+            pass
+        elif sel == 3:
+            return
 
 #travel to different areas
 def travel(data):
@@ -424,10 +430,11 @@ def travel(data):
     print("1. 🏠 Home")
     print("2. 🏦 Bank")
     print("3. 🏛  Currency Exchange")
-    print("4. ✈  Airport")
-    print("5. 🚢 Docks")
+    print("4. 🏬 Store")
+    print("5. ✈  Airport")
+    print("6. 🚢 Docks")
     sel = get_input("? ")
-    if sel in range(1,6):
+    if sel in range(1,7):
         if sel == 1:
             home(data)
         elif sel == 2:
@@ -435,9 +442,13 @@ def travel(data):
         elif sel == 3:
             xchange(data)
         elif sel == 4:
-            airport(data)
+            store(data)
         elif sel == 5:
+            airport(data)
+        elif sel == 6:
             docks(data)
+        elif sel == 7:
+            return
 
 
 
@@ -453,20 +464,26 @@ def casino(data):
         print("💰💰 Casino 💰💰")
         print("1.🎰 Play Slots")
         print("2.🎡 Play Roullette")
-        print("3.🌐 Explore around")
-        print("4.❌ Leave")
+        print("3.🃏 Play War")
+        print("4.🙌 Beg on the streets")
+        print("5.👞 Walk around")
+        print("6.❌ Leave")
         try:
             sel = get_input("? ")
         except KeyboardInterrupt:
             return
-        if sel in range(1,5):
+        if sel in range(1,7):
             if sel == 1:
                 slots(data)
             elif sel == 2:
                 roullete(data)
             elif sel == 3:
-                explore(data)
+                war(data)
             elif sel == 4:
+                beg(data)
+            elif sel == 5:
+                print("You walk around...")
+            elif sel == 6:
                 return
 
 
