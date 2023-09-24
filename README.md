@@ -24,10 +24,6 @@ resting quickly restore a little energy, while sleeping takes a bit but restores
 Tickets are quite expensive, but they allow you to get on an airplane or a ship
 tho both require atleast 10 tickets
 
-### Begging
-Begging is a quick way to earn some starting cash, the folks around the casino
-are willing to just handle you up to $10 in Bucks.
-
 ## Visit Casino
 Visit the popular casino and gamble, beg for money, walk around and much more
 
@@ -56,6 +52,8 @@ Spin 5 machine reels and try to match any 2 symbols
 ### War
 
 ### Begging
+Begging is a quick way to earn some starting cash, the folks around the casino
+are willing to just handle you up to $10 in Bucks.
 
 ### Walking around
 
