@@ -162,13 +162,13 @@ def beg(data):
 #get_value(char) - returns the number value of special chars like K,Q,J,A and wild chars
 def get_value(item):
         if item == 'A':
-            return 100
+            return 200
         elif item == 'J':
-            return 70
+            return 100
         elif item == 'K':
-            return 90
+            return 100
         elif item == 'Q':
-            return 90
+            return 100
         elif item == '♥':
             return 50
         elif item == '♦':
@@ -201,7 +201,7 @@ def slots(data):
             balance[my_bet[0]] -= my_bet[1]
             increase_time()
             use_energy(3)
-            roll = "1,2,3,4,5,6,7,8,9,A,J,K,Q,♥,♦,♠,♣".split(",")
+            roll = "2,3,4,5,6,7,8,9,A,J,K,Q,♥,♦,♠,♣".split(",")
             rolls = []
             multi = 0
             did_win = False
