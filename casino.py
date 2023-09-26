@@ -5,10 +5,14 @@ import math
 import sys
 import os.path
 
+
+
 bank_account = {
     "bucks": 0,
     "coins": 0,
-    "limecoins": 0
+    "limecoins": 0,
+    "ambinar": 0,
+    "gillinite": 0
 }
 
 save_data = {
@@ -25,6 +29,16 @@ save_data = {
     "balance": bank_account.copy()
 }
 
+def format_currency(val):
+    if val > 1000 and val < 1000000:
+        percent = val / 1000
+        return str(percent) + " K"
+    elif val > 1000000 and val < 1000000000:
+        percent = val / 1000000
+        return str(percent) + " M"
+    elif val > 1000000000:
+        percent = val / 1000000000
+        return str(percent) + " B"
 
 def save_game(sv_fname, data):
     json.dump(data, open(sv_fname,"w"),indent=4)
@@ -65,7 +79,7 @@ def header(data):
     print("-"*50)
     print(f"Name: {data['name']} ✔ {data['wins']} / ❌ {data['losses']}")
     print(f"Time: ⌚ {data['hours']} Hours / 📅 {data['days']} Days")
-    print(f"Balance: 💵 ${balance['bucks']:.2f} / 🔘 {math.ceil(balance['coins'])} Coins / 🟡 {math.ceil(balance['limecoins'])} Limecoins")
+    print(f"Balance: 💵 ${format_currency(balance['bucks'])} / 🔘 {math.ceil(balance['coins'])} Coins / 🟡 {math.ceil(balance['limecoins'])} Limecoins / 💍 {math.ceil(balance['ambinar'])} Ambinar / 💎 {math.ceil(balance['gillinite'])} Gillinite")
     print(f"Energy: ⚡ {data['energy']}\tTickets: 🎫 {data['tickets']}")
     print(f"-"*50)
 
@@ -91,10 +105,12 @@ def select_bet(data):
         balance = data['balance']
         print(random.choice(["Cmon, place ya bets","Care to make a wager?"]))
         bet_type = False
-        print(f"1. 💵 Use Bucks (${balance['bucks']:.2f})")
+        print(f"1. 💵 Use Bucks (${format_currency(balance['bucks'])})")
         print(f"2. 🔘 Use Coins ({math.ceil(balance['coins'])} Coins)")
         print(f"3. 🟡 Use Limecoins ({math.ceil(balance['limecoins'])})")
-        print("4. ❌ Cancel Bet")
+        print(f"4. 💍 Use Ambinar ({math.ceil(balance['ambinar'])})")
+        print(f"5. 💎 Use Gillinite ({math.ceil(balance['gillinite'])})")
+        print(f"6. ❌ Cancel Bet")
         try:
             bet_select = int(input("Bet with? "))
             if bet_select in range(1,5):
@@ -122,6 +138,22 @@ def select_bet(data):
                         print("Limecoins, only good here.")
                         bet_type = "limecoins"
                 elif bet_select == 4:
+                    if balance['ambinar'] <= 0:
+                        print(f"Not enough Ambinar, go mine some")
+                        break
+                    else:
+                        print("A Rare gemstone")
+                        bet_type = 'ambinar'
+                    pass
+                elif bet_select == 5:
+                    if balance['gillinite'] <= 0:
+                        print(f"Not enough Gillinite")
+                        break
+                    else:
+                        print("Rare Form of Diamond")
+                        bet_type = 'gillinite'
+                    return False
+                elif bet_select == 6:
                     return False
         except KeyboardInterrupt:
             return False
@@ -129,7 +161,6 @@ def select_bet(data):
             while 1:
                 amt = int(input(f"How much {bet_type} you wanna wager? "))
                 if int(balance[bet_type]) >= amt:
-                    print(f"Alright thats {amt} {bet_type}")
                     return (bet_type, amt)
                 else:
                     continue
@@ -295,8 +326,6 @@ def computer():
                 print()
                 print("❌ Unknown Command use /help")
 
-
-
 def home(data):
     increase_time()
     use_energy(1)
@@ -459,10 +488,12 @@ def travel(data):
     print("Travel To Where")
     print("1. 🏠 Home")
     print("2. 🏦 Bank")
-    print("3. 🏛  Currency Exchange")
-    print("4. 🏬 Store")
-    print("5. ✈  Airport")
-    print("6. 🚢 Docks")
+    print("3. 💰 Casino")
+    print("4. 🏛  Currency Exchange")
+    print("5. 🏬 Store")
+    print("6. ✈  Airport")
+    print("7. 🚢 Docks")
+    print("8. ❌ Cancel")
     sel = get_input("? ")
     if sel in range(1,7):
         if sel == 1:
@@ -470,14 +501,16 @@ def travel(data):
         elif sel == 2:
             go_bank(data)
         elif sel == 3:
-            xchange(data)
+            casino(data)
         elif sel == 4:
-            store(data)
+            xchange(data)
         elif sel == 5:
-            airport(data)
+            store(data)
         elif sel == 6:
-            docks(data)
+            airport(data)
         elif sel == 7:
+            docks(data)
+        elif sel == 8:
             return
 
 def get_value_war(val):
@@ -530,13 +563,13 @@ def roullete(data):
 def casino(data):
     while 1:
         header(data)
-        print("💰💰 Casino 💰💰")
-        print("1.🎰 Play Slots")
-        print("2.🎡 Play Roullette")
-        print("3.🃏 Play War")
-        print("4.🙌 Beg on the streets")
-        print("5.👞 Walk around")
-        print("6.❌ Leave")
+        print("💰Casino💰")
+        print("1. 🎰 Play Slots")
+        print("2. 🎡 Play Roullette")
+        print("3. 🃏 Play War")
+        print("4. 🙌 Beg on the streets")
+        print("5. 👞 Walk around")
+        print("6. ❌ Leave")
         try:
             sel = get_input("? ")
         except KeyboardInterrupt:
@@ -602,26 +635,29 @@ def main(data):
         #clearscr()
         header(data)
         print("🗺   Map Screen")
-        print("1.💰 Visit Casino")
-        print("2.🌐 Travel")
-        print("3.💾 Save")
+        print("1. 😊 Stats")
+        print("2. 🎒 Inventory")
+        print("3. 🌐 Travel")
+        print("4. 💾 Save")
         #print(f"4.💸 Resume ({'File Found' if os.path.exists('save.json') else 'No Save'})")
-        print("4.❌ Quit")
+        print("5.❌ Quit")
         try:
             sel = get_input("? ")
         except KeyboardInterrupt:
             return
-        if sel in range(1,5):
+        if sel in range(1,6):
             if sel == 1:
-                casino(data)
+                stats(data)
             elif sel == 2:
-                travel(data)
+                print("Inventory")
             elif sel == 3:
+                travel(data)
+            elif sel == 4:
                 if is_broke(data):
                     print("💲 Zero Balance, cant save (did you mean to load a save?)")
                 else:
                     save_game("save.json", data)
-            elif sel == 4:
+            elif sel == 5:
                 break
 
 
