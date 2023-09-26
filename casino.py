@@ -261,9 +261,39 @@ def slots(data):
 
 def computer():
     global save_data
-    print("1. ✉ Check Email")
+    print("1. ✉  Check Email")
     print("2. 🌐 Browse Web")
     print("3. 💾 Hack Servers")
+    print("4. 🖥 Open Command Line")
+    sel = get_input("? ")
+    if sel == 4:
+        print("PC Bootup, /help for commands")
+        while 1:
+            try:
+                command = input("> ").lower()
+            except KeyboardInterrupt:
+                print("❌ Goodbye")
+                break
+            except ValueError:
+                print("❌ Invalid Input")
+            if command.startswith("/cheat "):
+                code = command.split("/cheat ")[1]
+                if code == "casino":
+                    save_data['balance']['bucks'] += 1000000
+                    print("🤑 Bank Glitch: Balance + 1M")
+            elif command.startswith("/exit"):
+                print("❌ Goodbye")
+                break
+            elif command.startswith("/help"):
+                print()
+                print("📖 PC Command Help Page")
+                print("/cheat <code>")
+                print("/help")
+                print("/exit")
+                print("sdfs#$%e53#$%453l#$%df sdfsoe3#$%%Y")
+            else:
+                print()
+                print("❌ Unknown Command use /help")
 
 
 
@@ -450,12 +480,51 @@ def travel(data):
         elif sel == 7:
             return
 
+def get_value_war(val):
+    if val == "A":
+        return 20
+    elif val in "2,3,4,5,6,7,8,9".split(","):
+        return int(val)
+    elif val in "K,Q,J".split(","):
+        return 10
 
+def war(data):
+    balance = data['balance']
+    print("🃏 Play War")
+    my_bet = select_bet(data)
+    if my_bet:
+        currency = my_bet[0]
+        bet_value = my_bet[1]
+        balance[currency] -= bet_value
+        cards = "A,2,3,4,5,6,7,8,9,K,Q,J".split(",")
+        suits = "♥,♦,♠,♣".split(",")
+        pc_sum = 0
+        player_sum = 0
+        for i in range(2):
+            r_card = random.choice(cards)
+            r_suit = random.choice(suits)
+            print(f"🃏 Dealer Hand #{i+1} {r_card} {r_suit} -> {get_value_war(r_card)}")
+            pc_sum += get_value_war(r_card)
+        print(f"Dealer Sum is {pc_sum}")
+        print("Player Draws...")
+        for i in range(2):
+            r_card = random.choice(cards)
+            r_suit = random.choice(suits)
+            print(f"🃏 Player Hand #{i+1} {r_card} {r_suit} -> {get_value_war(r_card)}")
+            player_sum += get_value_war(r_card)
+        print(f"Player Sum is {player_sum}")
+        if player_sum > pc_sum:
+            print("✔ Player Won!")
+            return True
+        else:
+            print("❌ Dealer Won!")
+            return False
 
 
 #roullete - gonna use cos to generate an angle, and dot product to gestimate its closeness
 def roullete(data):
-    pass
+    print("🎡 Play Roullete")
+    print("")
 
 #casino menu
 def casino(data):
